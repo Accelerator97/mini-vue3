@@ -46,8 +46,7 @@ function cleanupEffect(effect) {
 // 收集依赖
 const targetMap = new Map();
 export function track(target, key) {
-  if (!activeEffect) return;
-  if (!shouldTrack) return;
+  if (!isTracking()) return;
   // target(代理的对象) → key → dep
   // 代理对象的依赖容器
   let depsMap = targetMap.get(target);
@@ -61,6 +60,14 @@ export function track(target, key) {
     dep = new Set();
     depsMap.set(key, dep);
   }
+  trackEffects(dep);
+}
+
+export function isTracking() {
+  return shouldTrack && activeEffect !== undefined;
+}
+
+export function trackEffects(dep) {
   if (dep.has(activeEffect)) return;
   // 添加依赖
   dep.add(activeEffect);
@@ -71,6 +78,10 @@ export function track(target, key) {
 export function trigger(target, key) {
   let depsMap = targetMap.get(target);
   let dep = depsMap.get(key);
+  triggerEffects(dep);
+}
+
+export function triggerEffects(dep) {
   for (const effect of dep) {
     if (effect.scheduler) {
       effect.scheduler();
