@@ -6,6 +6,7 @@ class RefImp {
   private _value: any;
   private _raw: any;
   public dep;
+  public __v_isRef = true;
   constructor(value) {
     // 保存没有处理过的原始值
     this._raw = value;
@@ -42,4 +43,27 @@ function convert(value) {
 
 export function ref(value) {
   return new RefImp(value);
+}
+
+export function isRef(val) {
+  return !!val.__v_isRef;
+}
+
+export function unRef(val) {
+  return isRef(val) ? val.value : val;
+}
+
+export function proxyRef(objectWithRefs) {
+  return new Proxy(objectWithRefs, {
+    get(target, key) {
+      return unRef(Reflect.get(target, key));
+    },
+    set(target, key, value) {
+      if (isRef(target[key]) && !isRef(value)) {
+        return (target[key].value = value);
+      } else {
+        return Reflect.set(target, key, value);
+      }
+    },
+  });
 }

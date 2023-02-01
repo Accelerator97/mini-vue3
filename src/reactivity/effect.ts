@@ -3,7 +3,7 @@ import { extend } from "../shared";
 let activeEffect: any;
 let shouldTrack; // 是否应该收集依赖
 
-class ReactiveEffect {
+export class ReactiveEffect {
   private _fn: any;
   deps = [];
   active = true; // 避免重复清空依赖
